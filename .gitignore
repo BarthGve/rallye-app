@@ -1,7 +1,7 @@
-/.vscode
+# Ignorer node_modules dans les deux dossiers
+server/node_modules/
+frontend/node_modules/
 
-/server/node_modules
-/frontend/node_modules
-
-
-/frontend/.env
+# Ignorer les fichiers .env dans les deux dossiers
+server/.env
+frontend/.env
