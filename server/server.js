@@ -9,6 +9,7 @@ const userRoutes = require("./routes/user");
 const protectedRoutes = require("./routes/protected");
 const User = require("./models/User");
 
+const morgan = require("morgan");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -18,6 +19,11 @@ app.use(
     secret: "your_secret_key",
     resave: false,
     saveUninitialized: true,
+    cookie: {
+      secure: false, // Assurez-vous que c'est true en production et avec HTTPS
+      httpOnly: true,
+      sameSite: "lax", // ou 'strict' ou 'none'
+    },
   })
 );
 
@@ -46,3 +52,5 @@ connectDB().then(() => {
     console.log(`Server running on port ${PORT}`);
   });
 });
+
+app.use(morgan("combined")); // ou 'dev' pour un format de log plus concis

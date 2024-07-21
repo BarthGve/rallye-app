@@ -44,6 +44,22 @@ const User = sequelize.define(
       allowNull: false,
       defaultValue: false, // Valeur par défaut pour acceptedTerms
     },
+    nom: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    prenom: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    genre: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    date_de_naissance: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   },
   {
     hooks: {

@@ -26,18 +26,13 @@
       </span>
     </template>
     <template #submenulabel="{ item }">
-      <span class="text-primary font-bold">{{ item.label }}</span>
+      <span class="font-bold">{{ item.label }}</span>
     </template>
     <template #item="{ item, props }">
       <a v-ripple class="flex items-center" v-bind="props.action">
         <span :class="item.icon" />
         <span>{{ item.label }}</span>
         <Badge v-if="item.badge" class="ml-auto" :value="item.badge" />
-        <span
-          v-if="item.shortcut"
-          class="ml-auto border border-surface rounded bg-emphasis text-muted-color text-xs p-1"
-          >{{ item.shortcut }}</span
-        >
       </a>
     </template>
     <template #end>
@@ -51,7 +46,7 @@
           shape="circle"
         />
         <span class="inline-flex flex-col items-start">
-          <span class="font-bold">{{ user.email }}</span>
+          <span class="font-bold">{{ user.prenom }} {{ user.nom }} </span>
           <span class="text-sm">{{ user.role }}</span>
         </span>
       </button>
@@ -87,6 +82,7 @@ const items = ref([
       {
         label: "Créer",
         icon: "pi pi-plus",
+        command: () => router.push("/create-user"),
       },
       {
         label: "Table",
@@ -102,12 +98,15 @@ const items = ref([
         label: "Settings",
         icon: "pi pi-cog",
       },
-      {
-        label: "Logout",
-        icon: "pi pi-sign-out",
-        command: () => logout(),
-      },
     ],
+  },
+  {
+    separator: false,
+  },
+  {
+    label: "Déconnexion",
+    icon: "pi pi-sign-out",
+    command: () => logout(),
   },
   {
     separator: true,

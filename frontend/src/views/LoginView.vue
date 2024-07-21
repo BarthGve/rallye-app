@@ -1,29 +1,102 @@
 <template>
-  <div class="login-view">
-    <h2>Login</h2>
-    <form class="p-4" @submit.prevent="loginUser">
-      <div>
-        <label for="email">Email:</label>
-        <input type="email" v-model="email" id="email" required />
+  <div
+    class="surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden"
+  >
+    <div
+      class="flex flex-column align-items-center justify-content-center form-container"
+    >
+      <div
+        class="w-full surface-card py-8 px-5 sm:px-8"
+        style="border-radius: 53px"
+      >
+        <div class="text-center mb-5">
+          <div class="text-900 text-3xl font-medium mb-3">Welcome!</div>
+          <span class="text-600 font-medium">Sign in to continue</span>
+        </div>
+
+        <form @submit.prevent="loginUser">
+          <div>
+            <label for="email" class="block text-900 text-xl font-medium mb-2"
+              >Email</label
+            >
+            <InputText
+              id="email"
+              type="email"
+              placeholder="Email address"
+              class="w-full md:w-30rem mb-5"
+              style="padding: 1rem"
+              v-model="email"
+              required
+            />
+          </div>
+          <div>
+            <label
+              for="password"
+              class="block text-900 text-xl font-medium mb-2"
+              >Password</label
+            >
+            <Password
+              id="password"
+              v-model="password"
+              placeholder="Password"
+              :toggleMask="true"
+              class="w-full mb-3"
+              inputClass="w-full"
+              :inputStyle="{ padding: '1rem' }"
+              required
+            />
+          </div>
+          <div
+            class="flex align-items-center justify-content-between mb-5 gap-5"
+          >
+            <div class="flex align-items-center">
+              <Checkbox
+                v-model="checked"
+                id="rememberme"
+                binary
+                class="mr-2"
+              ></Checkbox>
+              <label for="rememberme">Remember me</label>
+            </div>
+            <a
+              class="font-medium no-underline ml-2 text-right cursor-pointer"
+              style="color: var(--primary-color)"
+              >Forgot password?</a
+            >
+          </div>
+          <Button
+            label="Sign In"
+            type="submit"
+            class="w-full p-3 text-xl"
+          ></Button>
+          <div v-if="error" class="text-red-600 mt-4">{{ error }}</div>
+        </form>
       </div>
-      <div>
-        <label for="password">Password:</label>
-        <input type="password" v-model="password" id="password" required />
-      </div>
-      <button type="submit">Login</button>
-    </form>
-    <div v-if="error" class="error">{{ error }}</div>
+    </div>
   </div>
 </template>
 
 <script>
+import Button from "primevue/button";
+import Checkbox from "primevue/checkbox";
+import InputText from "primevue/inputtext";
+import Password from "primevue/password";
+
 export default {
   name: "LoginView",
+  components: {
+    InputText,
+    Password,
+    Checkbox,
+    Button,
+  },
   data() {
     return {
       email: "",
       password: "",
+      checked: false,
       error: "",
+      // Ajouter l'image importée dans les données
     };
   },
   methods: {
@@ -71,12 +144,32 @@ export default {
 </script>
 
 <style scoped>
-.login-view {
-  max-width: 300px;
-  margin: auto;
+.surface-ground {
+  background-image: url("../assets/image/landing_background.png");
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.error {
-  color: red;
-  margin-top: 10px;
+
+.form-container {
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.9
+  ); /* White background with transparency */
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Light shadow for better contrast */
+}
+
+.text-900 {
+  color: #212121;
+}
+
+.text-600 {
+  color: #757575;
 }
 </style>

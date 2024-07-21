@@ -2,40 +2,76 @@
   <div class="admin-layout">
     <header class="header">
       <div class="left">Panneau d'administration</div>
+      <div class="right" @click="toggleDropdown">
+        {{ user.email }}
+        <div v-if="showDropdown" class="dropdown-menu">
+          <button @click="logout">Logout</button>
+        </div>
+      </div>
     </header>
     <div class="main-content">
       <aside class="sidebar">
         <AdminMenu :user="user" />
       </aside>
       <main class="content">
-        <slot></slot>
+        <slot :user="user"></slot>
       </main>
     </div>
   </div>
 </template>
 
-<script setup>
+<script>
 import { ref } from "vue";
 import AdminMenu from "../components/AdminMenu.vue";
+import { useRouter } from "vue-router";
 
-const user = ref(null);
+export default {
+  components: {
+    AdminMenu,
+  },
+  setup() {
+    const user = ref(null);
+    const showDropdown = ref(false);
+    const router = useRouter();
 
-const token = localStorage.getItem("token");
-if (token) {
-  try {
-    const decoded = JSON.parse(atob(token.split(".")[1]));
-    user.value = {
-      email: decoded.email,
-      role: decoded.role,
+    const toggleDropdown = () => {
+      showDropdown.value = !showDropdown.value;
     };
-  } catch (error) {
-    console.error("Failed to decode token:", error);
-    localStorage.removeItem("token");
-    this.$router.push("/login");
-  }
-} else {
-  this.$router.push("/login");
-}
+
+    const logout = () => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      router.push("/");
+    };
+
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = JSON.parse(atob(token.split(".")[1]));
+        user.value = {
+          id: decoded.id,
+          email: decoded.email,
+          role: decoded.role,
+          nom: decoded.nom,
+          prenom: decoded.prenom,
+        };
+      } catch (error) {
+        console.error("Failed to decode token:", error);
+        localStorage.removeItem("token");
+        router.push("/login");
+      }
+    } else {
+      router.push("/login");
+    }
+
+    return {
+      user,
+      showDropdown,
+      toggleDropdown,
+      logout,
+    };
+  },
+};
 </script>
 
 <style scoped>
@@ -67,6 +103,32 @@ if (token) {
   position: relative;
   font-size: 16px;
   cursor: pointer;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 30px;
+  right: 0;
+  background-color: white;
+  color: black;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-menu button {
+  background: none;
+  border: none;
+  color: black;
+  padding: 10px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.dropdown-menu button:hover {
+  background-color: #f4f4f4;
 }
 
 .main-content {

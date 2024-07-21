@@ -1,13 +1,14 @@
-import { createRouter, createWebHistory } from "vue-router";
 import { useToast } from "primevue/usetoast"; // Importer correctement la fonction useToast
+import { createRouter, createWebHistory } from "vue-router";
 
-import LandingView from "../views/LandingView.vue";
-import RegisterView from "../views/RegisterView.vue";
-import LoginView from "../views/LoginView.vue";
-import HomeView from "../views/HomeView.vue";
 import AdminHomeView from "../views/AdminHomeView.vue";
 import AdminUserView from "../views/AdminUserView.vue";
+import CreateUserView from "../views/CreateUserView.vue";
+import HomeView from "../views/HomeView.vue";
+import LandingView from "../views/LandingView.vue";
+import LoginView from "../views/LoginView.vue";
 import NotFound from "../views/NotFound.vue";
+import RegisterView from "../views/RegisterView.vue";
 
 const routes = [
   {
@@ -43,6 +44,18 @@ const routes = [
     component: AdminUserView,
     meta: { requiresAuth: true, requiresAdmin: true },
   },
+  {
+    path: "/create-user",
+    name: "CreateUserView",
+    component: CreateUserView,
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
+  // {
+  //   path: "/admin-create-users",
+  //   name: "admin-create-users",
+  //   component: CreateUserView,
+  //   meta: { requiresAuth: true, requiresAdmin: true },
+  // },
   {
     path: "/:pathMatch(.*)*",
     name: "NotFound",
