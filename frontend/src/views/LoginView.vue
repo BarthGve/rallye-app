@@ -71,11 +71,19 @@
           ></Button>
           <div v-if="error" class="text-red-600 mt-4">{{ error }}</div>
         </form>
+        <div class="text-center mt-4">
+          <span class="text-600">Don't have an account? </span>
+          <router-link
+            to="/register"
+            class="font-medium"
+            style="color: var(--primary-color)"
+            >Create one</router-link
+          >
+        </div>
       </div>
     </div>
   </div>
 </template>
-
 <script>
 import Button from "primevue/button";
 import Checkbox from "primevue/checkbox";
@@ -96,7 +104,6 @@ export default {
       password: "",
       checked: false,
       error: "",
-      // Ajouter l'image importée dans les données
     };
   },
   methods: {
@@ -142,7 +149,6 @@ export default {
   },
 };
 </script>
-
 <style scoped>
 .surface-ground {
   background-image: url("../assets/image/landing_background.png");
