@@ -1,37 +1,32 @@
 <template>
-  <div class="last-five-users-table border p-4 shadow-lg rounded-lg">
-    <DataTable :value="users" responsiveLayout="scroll" class="text-base">
+  <div class="border rounded-lg shadow-lg last-five-users-table">
+    <DataTable :value="users" responsiveLayout="scroll" class="p-2">
       <template #header>
         <div class="flex flex-wrap items-center justify-between gap-2">
-          <span class="text-l font-bold"
-            >5 derniers utilisateurs inscrits
-          </span>
+          <span class="text-base font-bold"
+            >5 derniers utilisateurs inscrits</span
+          >
         </div>
       </template>
       <Column>
         <template #body="slotProps">
           <Avatar
             :label="getInitials(slotProps.data.prenom, slotProps.data.nom)"
-            :style="{
-              backgroundColor:
-                slotProps.data.genre === 'M' ? '#0000FF' : '#FF69B4',
-              color: '#FFFFFF',
-            }"
+            :style="avatarStyle(slotProps.data.genre)"
             shape="circle"
           />
         </template>
       </Column>
       <Column field="nom" header="Nom" sortable></Column>
       <Column field="prenom" header="Prénom"></Column>
-
-      <Column header="Âge">
+      <Column field="date_de_naissance" header="Date de Naissance">
         <template #body="slotProps">
-          {{ calculateAge(slotProps.data.date_de_naissance) }}
+          {{ formatDate(slotProps.data.date_de_naissance) }}
         </template>
       </Column>
-      <Column header="Enregistré le">
+      <Column header="Genre">
         <template #body="slotProps">
-          {{ formatDate(slotProps.data.createdAt) }}
+          <i :class="getGenderIcon(slotProps.data.genre)"></i>
         </template>
       </Column>
     </DataTable>
@@ -71,13 +66,23 @@ export default {
           throw new Error("Failed to fetch users");
         }
         const data = await response.json();
-        console.log("Fetched users data:", data); // Vérifiez les données ici
         this.users = data;
       } catch (error) {
         console.error(error);
       }
     },
+    getInitials(prenom, nom) {
+      if (!prenom || !nom) return "";
+      return `${prenom[0]}${nom[0]}`;
+    },
+    avatarStyle(genre) {
+      return {
+        backgroundColor: genre === "M" ? "#0000FF" : "#FF69B4",
+        color: "#FFFFFF",
+      };
+    },
     formatDate(dateString) {
+      if (!dateString) return "";
       const date = new Date(dateString);
       return date.toLocaleDateString("fr-FR", {
         day: "2-digit",
@@ -85,21 +90,9 @@ export default {
         year: "numeric",
       });
     },
-    calculateAge(birthdate) {
-      const today = new Date();
-      const birthDate = new Date(birthdate);
-      let ageYears = today.getFullYear() - birthDate.getFullYear();
-      let ageMonths = today.getMonth() - birthDate.getMonth();
-
-      if (ageMonths < 0) {
-        ageYears--;
-        ageMonths += 12;
-      }
-
-      return `${ageYears} ans`;
-    },
-    getInitials(prenom, nom) {
-      return `${prenom[0]}${nom[0]}`;
+    getGenderIcon(genre) {
+      if (!genre) return "";
+      return genre === "M" ? "pi pi-mars" : "pi pi-venus";
     },
   },
   mounted() {

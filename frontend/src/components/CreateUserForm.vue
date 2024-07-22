@@ -189,17 +189,17 @@ const createUser = async () => {
       throw new Error("Erreur lors de la création de l'utilisateur");
     }
     const data = await response.json();
-    await fetch(`${import.meta.env.VITE_APP_API_URL}/api/send-email`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        to: user.value.email,
-        subject: "Votre compte a été créé",
-        text: `Bonjour ${user.value.prenom},\n\nVotre compte a été créé avec succès. Voici votre mot de passe : ${password}\n\nVeuillez le changer après votre première connexion.\n\nCordialement,\nL'équipe.`,
-      }),
-    });
+    // await fetch(`${import.meta.env.VITE_APP_API_URL}/api/send-email`, {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({
+    //     to: user.value.email,
+    //     subject: "Votre compte a été créé",
+    //     text: `Bonjour ${user.value.prenom},\n\nVotre compte a été créé avec succès. Voici votre mot de passe : ${password}\n\nVeuillez le changer après votre première connexion.\n\nCordialement,\nL'équipe.`,
+    //   }),
+    // });
     toast.add({
       severity: "success",
       summary: "Succès",

@@ -10,7 +10,20 @@ import LoginView from "../views/LoginView.vue";
 import NotFound from "../views/NotFound.vue";
 import RegisterView from "../views/RegisterView.vue";
 
+import ForgotPasswordView from "../views/ForgotPasswordView.vue";
+import ResetPasswordView from "../views/ResetPasswordView.vue";
+
 const routes = [
+  {
+    path: "/reset-password/:token",
+    name: "ResetPassword",
+    component: ResetPasswordView,
+  },
+  {
+    path: "/forgot-password",
+    name: "ForgotPassword",
+    component: ForgotPasswordView,
+  },
   {
     path: "/",
     name: "landing",

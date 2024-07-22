@@ -18,11 +18,16 @@ const {
   getPlayersByAgeRange,
   getLastFiveUsers,
   getUsersByRole,
+  sendResetPasswordEmail,
+  resetPassword,
 } = require("../controllers/userController");
 const { authenticateJWT, authorizeAdmin } = require("../middlewares/auth");
 
 router.post("/register", register);
 router.post("/create-user", authenticateJWT, authorizeAdmin, createUser);
+
+router.post("/forgot-password", sendResetPasswordEmail);
+router.post("/reset-password", resetPassword);
 
 router.post("/login", login);
 router.get("/test-db", dbController.testConnection);

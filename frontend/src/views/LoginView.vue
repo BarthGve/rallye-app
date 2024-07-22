@@ -61,6 +61,7 @@
             <a
               class="font-medium no-underline ml-2 text-right cursor-pointer"
               style="color: var(--primary-color)"
+              @click="goToForgotPassword"
               >Forgot password?</a
             >
           </div>
@@ -145,6 +146,9 @@ export default {
       } catch (error) {
         this.error = error.message;
       }
+    },
+    goToForgotPassword() {
+      this.$router.push("/forgot-password");
     },
   },
 };

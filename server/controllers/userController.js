@@ -1,34 +1,11 @@
 const User = require("../models/User");
+const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize");
-
-// Fonction pour générer un mot de passe sécurisé
-const generatePassword = (length = 12) => {
-  const charset =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=";
-  let password = "";
-
-  // Assurez-vous que le mot de passe contient au moins un chiffre, une majuscule et un caractère spécial
-  const hasNumber = () => /\d/.test(password);
-  const hasUppercase = () => /[A-Z]/.test(password);
-  const hasSpecialChar = () =>
-    /[!@#$%^&*()_+~`|}{[\]:;?><,./-=]/.test(password);
-
-  while (
-    password.length < length ||
-    !hasNumber() ||
-    !hasUppercase() ||
-    !hasSpecialChar()
-  ) {
-    const randomByte = crypto.randomBytes(1);
-    const char = charset[randomByte[0] % charset.length];
-    password += char;
-  }
-
-  return password;
-};
+const sendEmail = require("../utils/sendMail");
+const generatePassword = require("../utils/generatePassword");
 
 exports.register = async (req, res) => {
   try {
@@ -48,9 +25,11 @@ exports.register = async (req, res) => {
       return res.status(400).json({ error: "Email is already in use" });
     }
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const newUser = await User.create({
       email,
-      password,
+      password: hashedPassword,
       role,
       acceptedTerms,
       nom,
@@ -96,12 +75,12 @@ exports.createUser = async (req, res) => {
       date_de_naissance,
     });
 
-    // Envoyer un email à l'utilisateur
-    // await sendEmail({
-    //   to: email,
-    //   subject: "Votre compte a été créé",
-    //   text: `Bonjour ${prenom},\n\nVotre compte a été créé avec succès. Voici votre mot de passe : ${password}\n\nVeuillez le changer après votre première connexion.\n\nCordialement,\nL'équipe.`,
-    // });
+    // Envoyer un email de confirmation
+    await sendEmail({
+      to: email,
+      subject: "Votre compte a été créé",
+      text: `Bonjour ${prenom},\n\nVotre compte a été créé avec succès. Voici votre mot de passe : ${password}\n\nVeuillez le changer après votre première connexion.\n\nCordialement,\nL'équipe.`,
+    });
 
     res
       .status(201)
@@ -110,6 +89,47 @@ exports.createUser = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+// exports.createUser = async (req, res) => {
+//   try {
+//     const { email, role, nom, prenom, genre, date_de_naissance } = req.body;
+
+//     // Vérifiez si l'utilisateur existe déjà
+//     const existingUser = await User.findOne({ where: { email } });
+//     if (existingUser) {
+//       return res.status(400).json({ error: "Email is already in use" });
+//     }
+
+//     // Générer un mot de passe sécurisé
+//     const password = generatePassword();
+
+//     // Hacher le mot de passe
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     // Créer le nouvel utilisateur
+//     const newUser = await User.create({
+//       email,
+//       password: hashedPassword,
+//       role,
+//       nom,
+//       prenom,
+//       genre,
+//       date_de_naissance,
+//     });
+
+//     await sendEmail({
+//       to: email,
+//       subject: "Votre compte a été créé",
+//       text: `Bonjour ${prenom},\n\nVotre compte a été créé avec succès. Voici votre mot de passe : ${password}\n\nVeuillez le changer après votre première connexion.\n\nCordialement,\nL'équipe.`,
+//     });
+
+//     res
+//       .status(201)
+//       .json({ message: "User created successfully", user: newUser });
+//   } catch (error) {
+//     res.status(400).json({ error: error.message });
+//   }
+// };
 
 exports.login = async (req, res) => {
   try {
@@ -201,6 +221,7 @@ exports.getAllUsers = async (req, res) => {
         "date_de_naissance",
         "createdAt",
         "updatedAt",
+        "password",
       ],
     });
     res.status(200).json(users);
@@ -342,6 +363,76 @@ exports.getUsersByRole = async (req, res) => {
       attributes: ["nom", "prenom", "date_de_naissance", "email", "genre"],
     });
     res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.sendResetPasswordEmail = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 heure
+    await user.save();
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const mailOptions = {
+      to: user.email,
+      from: process.env.EMAIL_USER,
+      subject: "Password Reset",
+      text:
+        `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n` +
+        `Please click on the following link, or paste this into your browser to complete the process:\n\n` +
+        `http://localhost:5173/reset-password/${token}\n\n` +
+        `If you did not request this, please ignore this email and your password will remain unchanged.\n`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ message: "Reset link sent" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  const { token, password } = req.body;
+
+  try {
+    const user = await User.findOne({
+      where: {
+        resetPasswordToken: token,
+        resetPasswordExpires: { [Op.gt]: Date.now() },
+      },
+    });
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ message: "Password reset token is invalid or has expired." });
+    }
+
+    user.password = await bcrypt.hash(password, 10);
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
+    await user.save();
+
+    res.status(200).json({ message: "Password has been reset." });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
